@@ -1,5 +1,6 @@
 using System;
 using API.Data;
+using API.Helpers;
 using API.Interfaces;
 using API.Services;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,9 @@ public static class ApplicationServiceExtensions
         serviceCollection.AddCors();
         serviceCollection.AddScoped<ITokenService, TokenService>();
         serviceCollection.AddScoped<IUserRepository, UserRepository>();
+        serviceCollection.AddScoped<IPhotoService, PhotoService>();
         serviceCollection.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+        serviceCollection.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
         
         return serviceCollection;
     }
