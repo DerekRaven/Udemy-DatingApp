@@ -14,7 +14,7 @@ import { MembersService } from '../../_services/members.service';
   templateUrl: './photo-editor.component.html',
   styleUrl: './photo-editor.component.css'
 })
-export class PhotoEditorComponent implements OnInit{
+export class PhotoEditorComponent implements OnInit {
   private accountService = inject(AccountService);
   private membersService = inject(MembersService);
   member = input.required<Member>();
@@ -31,10 +31,10 @@ export class PhotoEditorComponent implements OnInit{
     this.hasBaseDropZoneOver = e;
   }
 
-  deletePhoto(photo:Photo) {
+  deletePhoto(photo: Photo) {
     this.membersService.deletePhoto(photo).subscribe({
       next: _ => {
-        const updatedMember = {...this.member()};
+        const updatedMember = { ...this.member() };
         updatedMember.photos = updatedMember.photos.filter(x => x.id !== photo.id);
         this.memberChange.emit(updatedMember);
       }
@@ -49,7 +49,7 @@ export class PhotoEditorComponent implements OnInit{
           user.photoUrl = photo.url;
           this.accountService.setCurrentUser(user);
         }
-        const updatedMember = {...this.member()};
+        const updatedMember = { ...this.member() };
         updatedMember.photoUrl = photo.url;
         updatedMember.photos.forEach(p => {
           if (p.isMain) p.isMain = false;
@@ -77,9 +77,24 @@ export class PhotoEditorComponent implements OnInit{
 
     this.uploader.onSuccessItem = (item, response, status, headers) => {
       const photo = JSON.parse(response);
-      const updated = {...this.member() };
-      updated.photos.push(photo);
-      this.memberChange.emit(updated);
+      const updatedMember = { ...this.member() };
+      updatedMember.photos.push(photo);
+      this.memberChange.emit(updatedMember);
+
+      if (photo.isMain) {
+        const user = this.accountService.currentUser();
+        if (user) {
+          user.photoUrl = photo.url;
+          this.accountService.setCurrentUser(user);
+        }
+
+        updatedMember.photoUrl = photo.url;
+        updatedMember.photos.forEach(p => {
+          if (p.isMain) p.isMain = false;
+          if (p.id === photo.id) p.isMain = true;
+        });
+        this.memberChange.emit(updatedMember);
+      }
     }
   }
 
